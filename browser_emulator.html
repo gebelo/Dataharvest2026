@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.29">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Robert Gebeloff and Simon Wörpel, Dataharvest 2026">
+
+<title>Your Scraping Robot</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="browser_emulator_files/libs/clipboard/clipboard.min.js"></script>
+<script src="browser_emulator_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="browser_emulator_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="browser_emulator_files/libs/quarto-html/popper.min.js"></script>
+<script src="browser_emulator_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="browser_emulator_files/libs/quarto-html/anchor.min.js"></script>
+<link href="browser_emulator_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="browser_emulator_files/libs/quarto-html/quarto-syntax-highlighting-0815c480559380816a4d1ea211a47e91.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="browser_emulator_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="browser_emulator_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="browser_emulator_files/libs/bootstrap/bootstrap-81267100e462c21b3d6c0d5bf76a3417.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="fullcontent quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Your Scraping Robot</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Robert Gebeloff and Simon Wörpel, Dataharvest 2026 </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="scraping-with-a-browser-emulator" class="level2">
+<h2 class="anchored" data-anchor-id="scraping-with-a-browser-emulator">SCRAPING WITH A BROWSER EMULATOR</h2>
+<p>This is a class about advanced Web scraping techniques.</p>
+<p>But before we begin, let’s pause a moment and think about income inequality. The gap between the rich and the rest of us has been growing and growing in recent years, a global phenomenon that is at least partly to blame for many of the world’s problems.</p>
+<p>As journalists, we can tell this story in a macro way.</p>
+<p><img src="images/image1.png" title="source: World Inequality Database" class="img-fluid"></p>
+<section id="source-world-inequality-database" class="level5">
+<h5 class="anchored" data-anchor-id="source-world-inequality-database">Source: World Inequality Database</h5>
+<p>Or we can tell the story in a micro way, showing how inequality plays out in a variety of different ways.</p>
+<p>Late last year, my colleague Kurtis Lee came to me with an idea. He had noticed that blood plasma collection centers seemed to be appearing in surprising locations. These centers, which pay donors cash in exchange for donating blood components used in various medical therapies, have historically in the U.S. set up shop in poor neighborhoods, hoping to attract clients desperate for money.</p>
+<p>Kurtis suspected that these centers were increasingly moving into more suburban neighborhoods. Could I help him document this and figure out why?</p>
+<p>We had some help. A couple of academics had gathered and studied information about the location of plasma centers a decade ago and had observed the beginnings of a shift out of poor neighborhoods. They were happy to share their data. But could we update their work and see what happened in the five years since they stopped collecting information?</p>
+<p>The challenge was this: The U.S. Food and Drug Information maintains a database of blood plasma centers. But they don’t make it available as open data, and filing a FOIA for the data would probably take months.</p>
+<p>What the FDA does provide, however, is a way to look up plasma centers <a href="https://www.accessdata.fda.gov/scripts/cber/CFAppsPub/">one at a time</a>. And if that’s technically possible, we felt we could write a script that would look them all up, one at a time.</p>
+<p>So we mapped out a plan. I would create a browser emulator that would simulate what a person would do if they had to look up every center one at a time.</p>
+<p><img src="images/image2.png" class="img-fluid"></p>
+<p>Our emulator would go to the FDA search page and:</p>
+<ul>
+<li>Put a wildcard in the facility name page</li>
+<li>Select only Plasma Centers</li>
+<li>Select only Active facilities</li>
+<li>Display 100 results at a time.</li>
+</ul>
+<p>It would then page through the results and harvest information about every facility,</p>
+<p><img src="images/image3.png" class="img-fluid"></p>
+<p>including a URL that would lead to more information about each facility. It would then go through those URLS and harvest all of the data from those pages.</p>
+<p><img src="images/image4.png" class="img-fluid"></p>
+<p>This is a job that can be done in several different ways and in several different languages. If you’re a Python user, you’d probably use a library called Playwright to launch your emulator, but I’m going to show you how I did this in R using a library called “chromote” – which as you might have guessed is shorthand for “Chrome Remote”.</p>
+<p>The idea is that your script will launch a browser, as if it were a human user, and then follow the steps a human user would do – if they had a lot of time and patience to click dozens of times and copy and paste lots of data.</p>
+<p>Instead, our robotic entity will do all the clicking and data harvesting for us.</p>
+<p>At this point, if you’d like to follow along on your own laptop, you are welcome to do so, but I am going to leave you with this entire script to try on your own time, so it might be easier to learn if, for now, you just watch this as a demonstration.</p>
+<p>Feel free to interrupt at any time to ask questions.</p>
+<p>Anyway, before I write the actual code, I need to do some pre-work. When I fill out the initial form on the FDA page, I’m going to need to know what those four form-fields we want to manipulate are called in the underlying code.</p>
+<p><img src="images/image5.png" class="img-fluid"></p>
+<p>The four elements we’re going to deal with have the following names:</p>
+<p>Establishment Name = Establishment, value = %</p>
+<p>Establishment Status = EstablishmentStatus, value= ACTIVE</p>
+<p>Establishment Type= EstablishmentType, value=3</p>
+<p>Country = Country, value=US</p>
+<p>Records Per Page=nrecords, value=100</p>
+<p>Now we have to plan for how we’re going to launch a robot browser. This is a somewhat delicate subject because there are a lot of ways to do it and in my experience, as a journalist-trying-to-code, I’ve found that things that work one day tend to not work the next day.</p>
+<p>So after doing much research on the topic, I’ve concluded that the best way to do this is launch a browser window outside of your script on a port that you define, and then have your script run through that port.</p>
+<p>So on a Mac, you’d want to open your terminal and run this command:</p>
+<div class="sourceCode" id="cb1" data-code-overflow="wrap"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome</span> <span class="at">--remote-debugging-port</span><span class="op">=</span>9222 <span class="at">--user-data-dir</span><span class="op">=</span><span class="st">"/tmp/chrome_debug_profile"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>On a PC, it would be this:</p>
+<div class="sourceCode" id="cb2" data-code-overflow="wrap"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="st">"C:\Program Files\Google\Chrome\Application\chrome.exe"</span> <span class="at">--remote-debugging-port</span><span class="op">=</span>9222 <span class="at">--user-data-dir</span><span class="op">=</span><span class="st">"C:\chrome_debug_profile"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>These two commands should work 95 percent of the time. If it doesn’t work for you, you need to simply figure out the location of the Chrome executable – or the executable of some other Chromium-based browser (Edge should work, Firefox and Safari, probably not).</p>
+<p>Ok, so by now we have our parameters figured out and our robot-browser fired up, let’s code this up</p>
+<p>Load the libraries we’re going to use, including rvest, which is to help parse the HTML once we grab it.</p>
+<div class="sourceCode" id="cb3" data-code-overflow="wrap"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">library</span><span class="er">(</span><span class="ex">tidyverse</span><span class="kw">)</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co">#install.packages("chromote")</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="ex">library</span><span class="er">(</span><span class="ex">chromote</span><span class="kw">)</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co">#install.packages("rvest")</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="ex">library</span><span class="er">(</span><span class="ex">rvest</span><span class="kw">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Establish a connection with our browser:</p>
+<div class="sourceCode" id="cb4" data-code-overflow="wrap"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">rc</span> <span class="op">&lt;</span>- ChromeRemote<span class="va">$new</span><span class="er">(</span><span class="ex">host</span> = <span class="st">"localhost"</span>, port = 9222<span class="kw">)</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="ex">cm</span> <span class="op">&lt;</span>- Chromote<span class="va">$new</span><span class="er">(</span><span class="ex">browser</span> = rc<span class="kw">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Open a tab in our new browser window and go to the FDA search page:</p>
+<div class="sourceCode" id="cb5" data-code-overflow="wrap"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">b</span> <span class="op">&lt;</span>- cm<span class="va">$new_session</span><span class="er">(</span><span class="kw">)</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="ex">b</span><span class="va">$go_to</span><span class="er">(</span><span class="st">"https://www.accessdata.fda.gov/scripts/cber/CFAppsPub/"</span><span class="kw">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Fill out the form. Here I’m using some javascript</p>
+<div class="sourceCode" id="cb6" data-code-overflow="wrap"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">b</span><span class="va">$Runtime$evaluate</span><span class="er">(</span><span class="ex">expression</span> = <span class="st">"</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="st">  var inputField = document.querySelector('input[name*=</span><span class="dt">\"</span><span class="st">Establishment</span><span class="dt">\"</span><span class="st">]');</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="st">  if (inputField) {</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="st">    inputField.value = '%';</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="st">  } else {</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="st">    console.error('Could not find the Establishment Name field.');</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="st">  }</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="st">"</span><span class="kw">)</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="ex">b</span><span class="va">$Runtime$evaluate</span><span class="er">(</span><span class="ex">expression</span> = <span class="st">"</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="st">  var selectEl = document.querySelector('select[name*=</span><span class="dt">\"</span><span class="st">EstablishmentStatus</span><span class="dt">\"</span><span class="st">]');</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="st">  </span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="st">  if (selectEl) {</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="st">    selectEl.value = 'ACTIVE';</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="st">    selectEl.dispatchEvent(new Event('change'));</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="st">    console.log('Successfully set dropdown to Active');</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a><span class="st">  } else {</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a><span class="st">    console.error('Could not find the EstablishmentStatus dropdown.');</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a><span class="st">  }</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a><span class="st">"</span><span class="kw">)</span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a><span class="ex">b</span><span class="va">$Runtime$evaluate</span><span class="er">(</span><span class="ex">expression</span> = <span class="st">"</span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a><span class="st">  var selectC = document.querySelector('select[name*=</span><span class="dt">\"</span><span class="st">Country</span><span class="dt">\"</span><span class="st">]');</span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a><span class="st">  </span></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a><span class="st">  if (selectC) {</span></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a><span class="st">    selectC.value = 'US';</span></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a><span class="st">    select.dispatchEvent(new Event('change'));</span></span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a><span class="st">    console.log('Successfully set dropdown to Active');</span></span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a><span class="st">  } else {</span></span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a><span class="st">    console.error('Could not find the EstablishmentStatus dropdown.');</span></span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a><span class="st">  }</span></span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a><span class="st">"</span><span class="kw">)</span></span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a><span class="ex">b</span><span class="va">$Runtime$evaluate</span><span class="er">(</span><span class="ex">expression</span> = <span class="st">"</span></span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a><span class="st">  var selectET = document.querySelector('select[name*=</span><span class="dt">\"</span><span class="st">EstablishmentType</span><span class="dt">\"</span><span class="st">]');</span></span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a><span class="st">  </span></span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a><span class="st">  if (selectET) {</span></span>
+<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a><span class="st">    selectET.value = '3';</span></span>
+<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a><span class="st">    select.dispatchEvent(new Event('change'));</span></span>
+<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a><span class="st">    console.log('Successfully set dropdown to Active');</span></span>
+<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a><span class="st">  } else {</span></span>
+<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a><span class="st">    console.error('Could not find the EstablishmentStatus dropdown.');</span></span>
+<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a><span class="st">  }</span></span>
+<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a><span class="st">"</span><span class="kw">)</span></span>
+<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-46"><a href="#cb6-46" aria-hidden="true" tabindex="-1"></a><span class="ex">b</span><span class="va">$Runtime$evaluate</span><span class="er">(</span><span class="ex">expression</span> = <span class="st">"</span></span>
+<span id="cb6-47"><a href="#cb6-47" aria-hidden="true" tabindex="-1"></a><span class="st">  var selectN = document.querySelector('select[name*=</span><span class="dt">\"</span><span class="st">nrecords</span><span class="dt">\"</span><span class="st">]');</span></span>
+<span id="cb6-48"><a href="#cb6-48" aria-hidden="true" tabindex="-1"></a><span class="st">  </span></span>
+<span id="cb6-49"><a href="#cb6-49" aria-hidden="true" tabindex="-1"></a><span class="st">  if (selectN) {</span></span>
+<span id="cb6-50"><a href="#cb6-50" aria-hidden="true" tabindex="-1"></a><span class="st">    selectN.value = '100';</span></span>
+<span id="cb6-51"><a href="#cb6-51" aria-hidden="true" tabindex="-1"></a><span class="st">    selectEl.dispatchEvent(new Event('change'));</span></span>
+<span id="cb6-52"><a href="#cb6-52" aria-hidden="true" tabindex="-1"></a><span class="st">    console.log('Successfully set dropdown to Active');</span></span>
+<span id="cb6-53"><a href="#cb6-53" aria-hidden="true" tabindex="-1"></a><span class="st">  } else {</span></span>
+<span id="cb6-54"><a href="#cb6-54" aria-hidden="true" tabindex="-1"></a><span class="st">    console.error('Could not find the EstablishmentStatus dropdown.');</span></span>
+<span id="cb6-55"><a href="#cb6-55" aria-hidden="true" tabindex="-1"></a><span class="st">  }</span></span>
+<span id="cb6-56"><a href="#cb6-56" aria-hidden="true" tabindex="-1"></a><span class="st">"</span><span class="kw">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Now that the form looks the way we want it, let’s tell the robot to click the submit button:</p>
+<div class="sourceCode" id="cb7" data-code-overflow="wrap"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">b</span><span class="va">$Runtime$evaluate</span><span class="er">(</span><span class="ex">expression</span> = <span class="st">"</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="st">  var submitBtn = document.querySelector('[name=</span><span class="dt">\"</span><span class="st">SubmitButton</span><span class="dt">\"</span><span class="st">]');</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="st">  </span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="st">  if (submitBtn) {</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="st">    submitBtn.click();</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="st">    console.log('SubmitButton successfully clicked!');</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="st">  } else {</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="st">    console.error('Could not find an element with name=</span><span class="dt">\"</span><span class="st">SubmitButton</span><span class="dt">\"</span><span class="st">');</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="st">  }</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="st">"</span><span class="kw">)</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="co"># IMPORTANT: Pause R for a few seconds to let the search results load in Chrome</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="ex">Sys.sleep</span><span class="er">(</span><span class="ex">3</span><span class="kw">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>You’ll notice that the results are paginated. So let’s tell our robot that it should keep the script going as long as there is a button on the page with the id of “Display next”.</p>
+<div class="sourceCode" id="cb8" data-code-overflow="wrap"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. Initialize an empty list and a tracking counter</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="ex">all_pages_list</span> <span class="op">&lt;</span>- list<span class="er">(</span><span class="kw">)</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="ex">page_counter</span> <span class="op">&lt;</span>- 1</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="ex">has_next_page</span> <span class="op">&lt;</span>- TRUE</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="ex">message</span><span class="er">(</span><span class="st">"Starting loop..."</span><span class="kw">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Now let’s write the loop:</p>
+<div class="sourceCode" id="cb9" data-code-overflow="wrap"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> <span class="kw">(</span><span class="ex">has_next_page</span><span class="kw">)</span> <span class="kw">{</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="ex">message</span><span class="er">(</span><span class="fu">paste</span><span class="er">(</span><span class="st">"Processing Page:"</span><span class="ex">,</span> page_counter<span class="kw">))</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  <span class="co"># -------------------------------------------------------------</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>  <span class="co"># STEP 1: CAPTURE AND PARSE HTML (YOUR EXACT CODE)</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>  <span class="co"># -------------------------------------------------------------</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  <span class="ex">doc</span> <span class="op">&lt;</span>- b<span class="va">$DOM$getDocument</span><span class="er">(</span><span class="kw">)</span> <span class="co"># grab page and filter down to the html</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>  <span class="ex">html_list</span> <span class="op">&lt;</span>- b<span class="va">$DOM$getOuterHTML</span><span class="er">(</span><span class="ex">nodeId</span> = doc<span class="va">$root$nodeId</span><span class="kw">)</span> </span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>  <span class="ex">fda_html</span> <span class="op">&lt;</span>- html_list<span class="va">$outerHTML</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>  <span class="ex">parsed_page</span> <span class="op">&lt;</span>- read_html<span class="er">(</span><span class="ex">fda_html</span><span class="kw">)</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>  <span class="co">#get the table with the relevent data</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>  <span class="ex">raw_table</span> <span class="op">&lt;</span>- parsed_page %<span class="op">&gt;</span>%</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>    <span class="ex">html_element</span><span class="er">(</span><span class="st">"table.tbl"</span><span class="kw">)</span> <span class="ex">%</span><span class="op">&gt;</span>%</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">html_table()</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>  <span class="co">#get the first column as a list</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>  <span class="ex">first_column_nodes</span> <span class="op">&lt;</span>- parsed_page %<span class="op">&gt;</span>%</span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>    <span class="ex">html_elements</span><span class="er">(</span><span class="st">"table.tbl td:first-child a"</span><span class="kw">)</span> </span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>  <span class="co">#pull out the urls from the first column as a list</span></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>  <span class="ex">urls</span> <span class="op">&lt;</span>- first_column_nodes %<span class="op">&gt;</span>%</span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>    <span class="ex">html_attr</span><span class="er">(</span><span class="st">"href"</span><span class="kw">)</span></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>  <span class="co">#get the text from the first column as a list</span></span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>  <span class="ex">text</span> <span class="op">&lt;</span>- first_column_nodes %<span class="op">&gt;</span>%</span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>    <span class="fu">html_text()</span></span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>  <span class="co">#create a table out of those lists</span></span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a>  <span class="ex">url_data</span> <span class="op">&lt;</span>- tibble<span class="er">(</span></span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a>    <span class="ex">text</span> = text,</span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a>    <span class="ex">url</span> = urls</span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a>  <span class="kw">)</span></span>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a>  <span class="co">#create a final table by merging those two columns with the main table</span></span>
+<span id="cb9-37"><a href="#cb9-37" aria-hidden="true" tabindex="-1"></a>  <span class="ex">final_table</span> <span class="op">&lt;</span>- raw_table %<span class="op">&gt;</span>%</span>
+<span id="cb9-38"><a href="#cb9-38" aria-hidden="true" tabindex="-1"></a>    <span class="ex">bind_cols</span><span class="er">(</span><span class="ex">url_data</span><span class="kw">)</span></span>
+<span id="cb9-39"><a href="#cb9-39" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb9-40"><a href="#cb9-40" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Store this individual page's table inside our tracker list</span></span>
+<span id="cb9-41"><a href="#cb9-41" aria-hidden="true" tabindex="-1"></a>  <span class="va">all_pages_list</span><span class="op">[</span>[page_counter<span class="op">]</span><span class="ex">]</span> <span class="op">&lt;</span>- final_table</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Now let’s check to see if we have another page to process:</p>
+<div class="sourceCode" id="cb10" data-code-overflow="wrap"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a> <span class="co"># -------------------------------------------------------------</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># STEP 2: TARGET THE 'Display next' ID AND CLICK IT</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="co"># -------------------------------------------------------------</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="ex">js_click_result</span> <span class="op">&lt;</span>- b<span class="va">$Runtime$evaluate</span><span class="er">(</span><span class="ex">expression</span> = <span class="st">"</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="st">    var nextBtn = document.getElementById('Display next');</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="st">    if (nextBtn) {</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="st">      nextBtn.click();</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="st">      true;  // Tells R the button was found and clicked</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="st">    } else {</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a><span class="st">      false; // Tells R the button doesn't exist anymore</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="st">    }</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a><span class="st">  "</span><span class="kw">)</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Extract the true/false logical result from JavaScript</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>  <span class="ex">button_was_clicked</span> <span class="op">&lt;</span>- js_click_result<span class="va">$result$value</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>If there is another page to do, get ready to do it:</p>
+<div class="sourceCode" id="cb11" data-code-overflow="wrap"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># -------------------------------------------------------------</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># STEP 3: REPEAT OR BREAK THE LOOP</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="co"># -------------------------------------------------------------</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="kw">(</span><span class="ex">button_was_clicked</span><span class="kw">)</span> <span class="kw">{</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    <span class="ex">page_counter</span> <span class="op">&lt;</span>- page_counter + 1</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># CRITICAL: Pause for 4 seconds to give Chrome time to pull </span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    <span class="co"># the next page down from the FDA servers before R tries to parse again</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>    <span class="ex">Sys.sleep</span><span class="er">(</span><span class="ex">4</span><span class="kw">)</span> </span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>  <span class="kw">}</span> <span class="cf">else</span> <span class="kw">{</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>    <span class="ex">message</span><span class="er">(</span><span class="st">"Finished! 'Display next' button is no longer on the page."</span><span class="kw">)</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>    <span class="ex">has_next_page</span> <span class="op">&lt;</span>- FALSE</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>  <span class="kw">}</span></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a><span class="er">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Finally, put all of the pages together into one table and write out results:</p>
+<div class="sourceCode" id="cb12" data-code-overflow="wrap"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># -------------------------------------------------------------</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 4: COMBINE ALL COLLECTED TABLES INTO A SINGLE DATA FRAME</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="co"># -------------------------------------------------------------</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="ex">master_results_table</span> <span class="op">&lt;</span>- bind_rows<span class="er">(</span><span class="ex">all_pages_list</span><span class="kw">)</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="co">#mutate the URL to add the prefix</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="ex">final_table</span><span class="op">&lt;</span>-master_results_table%<span class="op">&gt;</span>%</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>  <span class="ex">mutate</span><span class="er">(</span><span class="va">full_url</span><span class="op">=</span>paste<span class="kw">(</span><span class="st">"https://www.accessdata.fda.gov/scripts/cber/CFAppsPub/"</span><span class="ex">,url,sep=</span><span class="st">""</span><span class="kw">))</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a><span class="ex">write.csv</span><span class="er">(</span><span class="ex">final_table,</span><span class="st">"finaltable.csv"</span><span class="kw">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Because we now have a URL for each entity, we can now go to those pages and harvest that data, including, most crucially for this project, the facility’s address:</p>
+<p>We are going to store this data into a blank table we’re creating called detailed_entities:</p>
+<div class="sourceCode" id="cb13" data-code-overflow="wrap"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. Create an empty list to store the detailed data from each page</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="ex">details_list</span> <span class="op">&lt;</span>- list<span class="er">(</span><span class="kw">)</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. Get the total number of URLs to scrape for the progress monitor</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="ex">total_urls</span> <span class="op">&lt;</span>- nrow<span class="er">(</span><span class="ex">final_table</span><span class="kw">)</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="ex">detailed_entities</span> <span class="op">&lt;</span>- data.frame<span class="er">(</span><span class="va">category</span><span class="op">=</span>character<span class="kw">()</span><span class="ex">,</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>                                <span class="va">value</span><span class="op">=</span>character<span class="kw">()</span><span class="ex">,</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>                                <span class="va">facility_id</span><span class="op">=</span>character<span class="kw">())</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Now we can iterate through all of our urls and capture the data. For the purposes of this class, I will do only the first 10:</p>
+<div class="sourceCode" id="cb14" data-code-overflow="wrap"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="ex">message</span><span class="er">(</span><span class="fu">paste</span><span class="er">(</span><span class="st">"Starting deep scrape of"</span><span class="ex">,</span> total_urls, <span class="st">"URLs..."</span><span class="kw">))</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="co">#for (i in 1:total_urls) {</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> <span class="kw">(</span><span class="ex">i</span> in 1:10<span class="kw">)</span> <span class="kw">{</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Get the current URL</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>  <span class="ex">current_url</span> <span class="op">&lt;</span>- final_table<span class="va">$full_url</span><span class="pp">[</span><span class="ss">i</span><span class="pp">]</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Optional: Print progress so you know it hasn't frozen</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>  <span class="ex">message</span><span class="er">(</span><span class="ex">paste0</span><span class="er">(</span><span class="st">"Scraping page "</span><span class="ex">,</span> i, <span class="st">" of "</span>, total_urls, <span class="st">": "</span>, final_table<span class="va">$text</span><span class="pp">[</span><span class="ss">i</span><span class="pp">]</span><span class="kw">))</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>  <span class="co"># -------------------------------------------------------------</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>  <span class="co"># STEP 1: NAVIGATE TO THE DETAIL PAGE</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>  <span class="co"># -------------------------------------------------------------</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Wrap this in a tryCatch in case a single link is broken, so it won't crash the whole loop</span></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>  <span class="ex">tryCatch</span><span class="er">(</span><span class="kw">{</span></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>    <span class="ex">b</span><span class="va">$go_to</span><span class="er">(</span><span class="ex">current_url</span><span class="kw">)</span></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>    <span class="co"># -------------------------------------------------------------</span></span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>    <span class="co"># STEP 2: PARSE THE CONTENT</span></span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>    <span class="co"># -------------------------------------------------------------</span></span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>    <span class="ex">doc</span> <span class="op">&lt;</span>- b<span class="va">$DOM$getDocument</span><span class="er">(</span><span class="kw">)</span></span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>    <span class="ex">html_list</span> <span class="op">&lt;</span>- b<span class="va">$DOM$getOuterHTML</span><span class="er">(</span><span class="ex">nodeId</span> = doc<span class="va">$root$nodeId</span><span class="kw">)</span></span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>    <span class="ex">page_html</span> <span class="op">&lt;</span>- read_html<span class="er">(</span><span class="ex">html_list</span><span class="va">$outerHTML</span><span class="kw">)</span></span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>    <span class="ex">raw_table</span> <span class="op">&lt;</span>- page_html %<span class="op">&gt;</span>%</span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a>      <span class="ex">html_element</span><span class="er">(</span><span class="st">"table.StandardTable"</span><span class="kw">)</span><span class="ex">%</span><span class="op">&gt;</span>%</span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a>      <span class="fu">html_table()</span></span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a>    <span class="ex">selected_rows</span> <span class="op">&lt;</span>- raw_table[c<span class="er">(</span><span class="ex">6:19</span><span class="kw">)</span><span class="ex">,</span> ]%<span class="op">&gt;</span>%</span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a>      <span class="cf">select</span><span class="kw">(</span><span class="ex">X1,X2</span><span class="kw">)</span><span class="ex">%</span><span class="op">&gt;</span>%</span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a>      <span class="ex">rename</span><span class="er">(</span><span class="va">category</span><span class="op">=</span>X1,value=X2<span class="kw">)</span><span class="ex">%</span><span class="op">&gt;</span>%</span>
+<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a>      <span class="ex">mutate</span><span class="er">(</span><span class="va">facility_id</span><span class="op">=</span>strsplit<span class="kw">(</span><span class="ex">current_url,</span> <span class="st">"facility_id="</span><span class="kw">)</span><span class="ex">[[1]][2]</span><span class="kw">)</span></span>
+<span id="cb14-33"><a href="#cb14-33" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb14-34"><a href="#cb14-34" aria-hidden="true" tabindex="-1"></a>    <span class="ex">detailed_entities</span><span class="op">&lt;</span>-detailed_entities%<span class="op">&gt;</span>%</span>
+<span id="cb14-35"><a href="#cb14-35" aria-hidden="true" tabindex="-1"></a>      <span class="ex">bind_rows</span><span class="er">(</span><span class="ex">selected_rows</span><span class="kw">)</span></span>
+<span id="cb14-36"><a href="#cb14-36" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb14-37"><a href="#cb14-37" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb14-38"><a href="#cb14-38" aria-hidden="true" tabindex="-1"></a>  <span class="ex">},</span> error = function<span class="er">(</span><span class="ex">e</span><span class="kw">)</span> <span class="kw">{</span></span>
+<span id="cb14-39"><a href="#cb14-39" aria-hidden="true" tabindex="-1"></a>    <span class="ex">message</span><span class="er">(</span><span class="fu">paste</span><span class="er">(</span><span class="st">"Error scraping row"</span><span class="ex">,</span> i, <span class="st">":"</span>, e<span class="va">$message</span><span class="kw">))</span></span>
+<span id="cb14-40"><a href="#cb14-40" aria-hidden="true" tabindex="-1"></a>    <span class="ex">detailed_entities</span> <span class="op">&lt;</span>- detailed_entities</span>
+<span id="cb14-41"><a href="#cb14-41" aria-hidden="true" tabindex="-1"></a>  <span class="kw">}</span><span class="er">)</span></span>
+<span id="cb14-42"><a href="#cb14-42" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb14-43"><a href="#cb14-43" aria-hidden="true" tabindex="-1"></a>  <span class="co"># -------------------------------------------------------------</span></span>
+<span id="cb14-44"><a href="#cb14-44" aria-hidden="true" tabindex="-1"></a>  <span class="co"># STEP 3: THE "POLITE" PAUSE (Crucial)</span></span>
+<span id="cb14-45"><a href="#cb14-45" aria-hidden="true" tabindex="-1"></a>  <span class="co"># -------------------------------------------------------------</span></span>
+<span id="cb14-46"><a href="#cb14-46" aria-hidden="true" tabindex="-1"></a>  <span class="co"># This generates a random pause between 2.5 and 5 seconds per page.</span></span>
+<span id="cb14-47"><a href="#cb14-47" aria-hidden="true" tabindex="-1"></a>  <span class="co"># It breaks up the rhythmic typing pattern that firewalls look for.</span></span>
+<span id="cb14-48"><a href="#cb14-48" aria-hidden="true" tabindex="-1"></a>  <span class="ex">Sys.sleep</span><span class="er">(</span><span class="ex">runif</span><span class="er">(</span><span class="ex">1,</span> min = 2.5, max = 5.0<span class="kw">))</span></span>
+<span id="cb14-49"><a href="#cb14-49" aria-hidden="true" tabindex="-1"></a><span class="kw">}</span></span>
+<span id="cb14-50"><a href="#cb14-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-51"><a href="#cb14-51" aria-hidden="true" tabindex="-1"></a><span class="co"># -------------------------------------------------------------</span></span>
+<span id="cb14-52"><a href="#cb14-52" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 4: COMBINE AND MERGE BACK TO ORIGINAL DATA</span></span>
+<span id="cb14-53"><a href="#cb14-53" aria-hidden="true" tabindex="-1"></a><span class="co"># -------------------------------------------------------------</span></span>
+<span id="cb14-54"><a href="#cb14-54" aria-hidden="true" tabindex="-1"></a><span class="co"># Bind all the detail rows into one dataframe</span></span>
+<span id="cb14-55"><a href="#cb14-55" aria-hidden="true" tabindex="-1"></a><span class="ex">all_details_table</span> <span class="op">&lt;</span>- bind_rows<span class="er">(</span><span class="ex">details_list</span><span class="kw">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>In the end, after I scraped this data, we analyzed it and compared it to the older data provided by the academics, and my findings were a prominent part of <a href="https://www.nytimes.com/2026/03/20/business/middle-class-sell-their-plasma.html">the story</a>.</p>
+<p>So this all looks like a lot of detailed code and you might be wondering, will I ever write this code?</p>
+<p>The answer is: No, but I didn’t really write it either. Most of us these days learn to code by copying techniques we learn on the Internet or from AI.</p>
+<p>In your case, what I hope is that you use my code as a launching pad to take on whatever project you are facing. My code probably won’t work on your project perfectly right out of the box – but it will hopefully get you started and you’ll hopefully have learned enough from this session to be able to figure out how to modify the code and get it working.</p>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
