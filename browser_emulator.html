@@ -2493,7 +2493,10 @@ vertical-align: -.125em;
 <span id="cb14-52"><a href="#cb14-52" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 4: COMBINE AND MERGE BACK TO ORIGINAL DATA</span></span>
 <span id="cb14-53"><a href="#cb14-53" aria-hidden="true" tabindex="-1"></a><span class="co"># -------------------------------------------------------------</span></span>
 <span id="cb14-54"><a href="#cb14-54" aria-hidden="true" tabindex="-1"></a><span class="co"># Bind all the detail rows into one dataframe</span></span>
-<span id="cb14-55"><a href="#cb14-55" aria-hidden="true" tabindex="-1"></a><span class="ex">all_details_table</span> <span class="op">&lt;</span>- bind_rows<span class="er">(</span><span class="ex">details_list</span><span class="kw">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb14-55"><a href="#cb14-55" aria-hidden="true" tabindex="-1"></a><span class="ex">all_details_table</span> <span class="op">&lt;</span>- bind_rows<span class="er">(</span><span class="ex">details_list</span><span class="kw">)</span></span>
+<span id="cb14-56"><a href="#cb14-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-57"><a href="#cb14-57" aria-hidden="true" tabindex="-1"></a><span class="co">#close the browser</span></span>
+<span id="cb14-58"><a href="#cb14-58" aria-hidden="true" tabindex="-1"></a><span class="ex">b</span><span class="va">$close</span><span class="er">(</span><span class="kw">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>In the end, after I scraped this data, we analyzed it and compared it to the older data provided by the academics, and my findings were a prominent part of <a href="https://www.nytimes.com/2026/03/20/business/middle-class-sell-their-plasma.html">the story</a>.</p>
 <p>So this all looks like a lot of detailed code and you might be wondering, will I ever write this code?</p>
 <p>The answer is: No, but I didn’t really write it either. Most of us these days learn to code by copying techniques we learn on the Internet or from AI.</p>
