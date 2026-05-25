@@ -90,3 +90,28 @@ second_positions <- names_to_check %>%
 #    and extract the text label associated with that position.
 earliest_name <- names(second_positions)[which.min(second_positions)]
 
+
+
+#TRUMP TWEETS
+
+
+# read_lines() automatically handles UTF-8 encoding (crucial for emojis like 🇺🇸)
+tweet_df <- tibble(raw_text = read_lines("trumptweets.txt"))
+
+# 2. Clean up any empty lines that might be at the bottom of the text file
+tweet_df <- tweet_df %>% 
+  filter(raw_text != "" & !is.na(raw_text))
+
+#regex101 version: ^(\w{3}) (\d+), (\d{4}) (\d\d:\d\d:\d\d) (\w{2}) (.+)\[(.+)\](.+)
+#https://regex101.com/r/XxpV5G/3/substitution
+
+tweet_pattern <- "^(\\w{3}) (\\d+), (\\d{4}) (\\d{2}:\\d{2}:\\d{2}) (\\w{2})\\s+(.*?)\\s+\\[([^\\]]+)\\]\\s+link\\s*$"
+
+# Extract into your 7 columns
+parsed_tweets <- tweet_df %>% 
+  extract(
+    col = raw_text, 
+    into = c("month", "day", "year", "time", "ampm", "tweet", "source"), 
+    regex = tweet_pattern
+  )
+
