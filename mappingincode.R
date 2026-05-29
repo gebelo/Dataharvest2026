@@ -227,3 +227,23 @@ themap3<-leaflet()%>%
  
  themap6
  
+schools<-read_csv("schools.csv")
+
+schools<-schools%>%
+  st_as_sf(
+  coords = c("LON",
+             "LAT"),
+  crs = 4326)
+
+nearest_idx <- st_nearest_feature(schools, summer21)
+
+# 2. Pull the incident_id from summer21 using those indexes
+schools$nearest_incident_id <- summer21$incident_id[nearest_idx]
+
+# 3. Calculate the distance to that specific nearest incident
+schools$distance_to_summer <- st_distance(
+  schools, 
+  summer21[nearest_idx, ], 
+  by_element = TRUE
+)
+
