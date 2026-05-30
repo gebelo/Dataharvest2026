@@ -109,6 +109,7 @@ themap3<-leaflet()%>%
  
  
  mybins <- c(0, 0.4, 0.5, 0.6, 0.7,Inf)
+ 
  mypalette <- colorBin(
    palette = "YlOrBr", domain =counties_joined$trump,
    na.color = "transparent", bins = mybins
@@ -146,7 +147,7 @@ themap3<-leaflet()%>%
    addTiles() %>% 
    setView(-98.483330, 38.712046, zoom = 3)%>%
    addCircles(~summer21$lon, ~summer21$lat, 
-              popup=summer21$killed, weight = 3, radius=40, 
+              label=summer21$killed, weight = 3, radius=100, 
               color="red", stroke = TRUE, fillOpacity = 0.8) 
  
  themap5

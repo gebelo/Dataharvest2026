@@ -1,7 +1,9 @@
 #STRING PARSING
 
 #load libraries to deal with pdfs and add more string functions to our arsenal
-library(tidyverse,pdftools,purr)
+library(tidyverse)
+library(pdftools)
+library(purr)
 
 
 
